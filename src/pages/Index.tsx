@@ -2,8 +2,10 @@ import { useState } from 'react';
 import Home from './Home';
 import Chat from './Chat';
 import { SupabaseDashboard } from '@/components/SupabaseDashboard';
+import HowItWorks from '@/components/HowItWorks';
+import SampleQueries from '@/components/SampleQueries';
 
-type ViewType = 'home' | 'chat' | 'dashboard';
+type ViewType = 'home' | 'chat' | 'dashboard' | 'how-it-works' | 'sample-queries';
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<ViewType>('home');
@@ -13,6 +15,10 @@ const Index = () => {
     setSelectedCategory(option);
     if (option === 'Database' || option === 'Supabase Dashboard' || option === 'Live Data') {
       setCurrentView('dashboard');
+    } else if (option === 'How It Works') {
+      setCurrentView('how-it-works');
+    } else if (option === 'Sample Queries') {
+      setCurrentView('sample-queries');
     } else {
       setCurrentView('chat');
     }
@@ -29,6 +35,26 @@ const Index = () => {
         <Home onSelectOption={handleSelectOption} />
       ) : currentView === 'chat' ? (
         <Chat category={selectedCategory} onBack={handleBackToHome} />
+      ) : currentView === 'how-it-works' ? (
+        <div className="relative">
+          <button
+            onClick={handleBackToHome}
+            className="absolute top-8 left-8 z-10 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-lg rounded-xl text-white font-semibold transition-all duration-300 border border-white/20"
+          >
+            ← Back to Home
+          </button>
+          <HowItWorks />
+        </div>
+      ) : currentView === 'sample-queries' ? (
+        <div className="relative">
+          <button
+            onClick={handleBackToHome}
+            className="absolute top-8 left-8 z-10 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-lg rounded-xl text-white font-semibold transition-all duration-300 border border-white/20"
+          >
+            ← Back to Home
+          </button>
+          <SampleQueries />
+        </div>
       ) : (
         <div className="min-h-screen bg-[#00081d]">
           <div className="max-w-7xl mx-auto">
