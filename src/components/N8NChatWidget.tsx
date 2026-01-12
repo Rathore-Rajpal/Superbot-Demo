@@ -22,31 +22,48 @@ export const N8NChatWidget = () => {
     script.defer = true;
     script.innerHTML = `
       import Chatbot from "https://cdn.n8nchatui.com/v1/embed.js";
-      Chatbot.initFull({
-        "n8nChatUrl": "https://n8nautomation.site/webhook/cf1de04f-3e38-426c-89f0-3bdb110a5dcf/chat",
+      Chatbot.init({
+        "n8nChatUrl": "https://n8nautomation.site/webhook/710a142e-8c27-4d6f-b250-e6201dd15be7/chat",
         "metadata": {},
         "theme": {
           "button": {
+            "backgroundColor": "#062b89",
+            "right": 20,
+            "bottom": 20,
+            "size": 50,
             "iconColor": "#119cff",
-            "backgroundColor": "#00081d"
+            "customIconSrc": "https://nondzwqwgkqxwnxollfw.supabase.co/storage/v1/object/public/gg/robot%20(1).png",
+            "customIconSize": 60,
+            "customIconBorderRadius": 15,
+            "autoWindowOpen": {
+              "autoOpen": false,
+              "openDelay": 2
+            },
+            "borderRadius": "circle"
+          },
+          "tooltip": {
+            "showTooltip": false,
+            "tooltipMessage": "Hello 👋 customize & connect me to n8n",
+            "tooltipBackgroundColor": "#119cff",
+            "tooltipTextColor": "#f9faff",
+            "tooltipFontSize": 15
           },
           "chatWindow": {
             "borderRadiusStyle": "rounded",
-            "avatarBorderRadius": 25,
+            "avatarBorderRadius": 20,
             "messageBorderRadius": 6,
             "showTitle": true,
             "title": "SuperBot 🚀",
-            "titleAvatarSrc": "https://mmadclhbsuvkcbibxcsp.supabase.co/storage/v1/object/public/avatars//357f28f4-9993-4f63-b609-c31f60111133_1752589383843.png",
-            "avatarSize": 40,
-            "welcomeMessage": "Hey there! I'm Superbot, your AI assistant from Tasknova.",
+            "titleAvatarSrc": "https://nondzwqwgkqxwnxollfw.supabase.co/storage/v1/object/public/gg/robot%20(1).png",
+            "avatarSize": 32,
+            "welcomeMessage": " Hey there! I'm Superbot, your AI assistant by Rajpal Singh.",
             "errorMessage": "Please connect me to n8n first",
             "backgroundColor": "#010c27",
-            "height": 0,
-            "width": 0,
+            "height": 600,
+            "width": 400,
             "fontSize": 16,
             "starterPrompts": [
-              "What are today's tasks ?",
-              "What do you do?"
+              "What are the pending tasks ?"
             ],
             "starterPromptFontSize": 15,
             "renderHTML": false,
@@ -71,7 +88,7 @@ export const N8NChatWidget = () => {
               "sendButtonColor": "#01061b",
               "maxChars": 50,
               "maxCharsWarningMessage": "You exceeded the characters limit. Please input less than 50 characters.",
-              "autoFocus": false,
+              "autoFocus": true,
               "borderRadius": 6,
               "sendButtonBorderRadius": 50
             },
@@ -81,7 +98,8 @@ export const N8NChatWidget = () => {
                 "png",
                 "jpeg",
                 "jpg",
-                "pdf"
+                "pdf",
+                "txt"
               ],
               "maxSizeInMB": 5,
               "maxFiles": 1

@@ -16,12 +16,12 @@ import {
 } from 'lucide-react';
 import { 
   tasksService, 
-  membersService, 
+  usersService, 
   projectsService, 
   leavesService,
   dashboardService,
   type Task,
-  type Member,
+  type User,
   type Project,
   type Leave
 } from '@/services/supabaseService';
@@ -49,7 +49,7 @@ export const SupabaseDashboard: React.FC = () => {
   
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
 
@@ -62,17 +62,17 @@ export const SupabaseDashboard: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const [statsData, tasksData, membersData, projectsData, leavesData] = await Promise.all([
+      const [statsData, tasksData, usersData, projectsData, leavesData] = await Promise.all([
         dashboardService.getStats(),
         tasksService.getAll(),
-        membersService.getAll(),
+        usersService.getAllUsers(),
         projectsService.getAll(),
         leavesService.getAll()
       ]);
 
       setStats(statsData);
       setTasks(tasksData);
-      setMembers(membersData);
+      setAllUsers(usersData);
       setProjects(projectsData);
       setLeaves(leavesData);
     } catch (err: any) {
@@ -222,7 +222,7 @@ export const SupabaseDashboard: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Task Name</TableHead>
-                    <TableHead>Priority</TableHead>
+                    <TableHead>Assigned To</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Due Date</TableHead>
                     <TableHead>Progress</TableHead>
@@ -232,7 +232,7 @@ export const SupabaseDashboard: React.FC = () => {
                   {tasks.slice(0, 5).map((task) => (
                     <TableRow key={task.id}>
                       <TableCell className="font-medium">{task.task_name}</TableCell>
-                      <TableCell>{getPriorityBadge(task.priority)}</TableCell>
+                      <TableCell>{task.assigned_to || 'Unassigned'}</TableCell>
                       <TableCell>{getStatusBadge(task.status)}</TableCell>
                       <TableCell>{new Date(task.due_date).toLocaleDateString()}</TableCell>
                       <TableCell>{task.progress}%</TableCell>
@@ -289,11 +289,10 @@ export const SupabaseDashboard: React.FC = () => {
                   <TableRow>
                     <TableHead>Task Name</TableHead>
                     <TableHead>Description</TableHead>
-                    <TableHead>Priority</TableHead>
+                    <TableHead>Assigned To</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Due Date</TableHead>
                     <TableHead>Progress</TableHead>
-                    <TableHead>Hours</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -303,13 +302,10 @@ export const SupabaseDashboard: React.FC = () => {
                       <TableCell className="max-w-xs truncate">
                         {task.description || 'No description'}
                       </TableCell>
-                      <TableCell>{getPriorityBadge(task.priority)}</TableCell>
+                      <TableCell>{task.assigned_to || 'Unassigned'}</TableCell>
                       <TableCell>{getStatusBadge(task.status)}</TableCell>
                       <TableCell>{new Date(task.due_date).toLocaleDateString()}</TableCell>
                       <TableCell>{task.progress}%</TableCell>
-                      <TableCell>
-                        {task.actual_hours}/{task.estimated_hours}
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -321,8 +317,8 @@ export const SupabaseDashboard: React.FC = () => {
         <TabsContent value="members" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Team Members ({members.length})</CardTitle>
-              <CardDescription>All registered members</CardDescription>
+              <CardTitle>All Users ({allUsers.length})</CardTitle>
+              <CardDescription>Members, Admins, and Project Managers</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -330,24 +326,24 @@ export const SupabaseDashboard: React.FC = () => {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Department</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Role</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {members.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell className="font-medium">{member.name}</TableCell>
-                      <TableCell>{member.email}</TableCell>
-                      <TableCell>{member.department || 'N/A'}</TableCell>
-                      <TableCell>{member.phone || 'N/A'}</TableCell>
+                  {allUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{member.role}</Badge>
+                        <Badge variant="outline">
+                          {user.type === 'member' ? 'Member' : user.type === 'admin' ? 'Admin' : 'PM'}
+                        </Badge>
                       </TableCell>
+                      <TableCell>{user.department || 'N/A'}</TableCell>
                       <TableCell>
-                        {member.is_active ? (
+                        {user.is_active ? (
                           <Badge variant="default">Active</Badge>
                         ) : (
                           <Badge variant="secondary">Inactive</Badge>

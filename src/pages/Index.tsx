@@ -4,6 +4,7 @@ import Chat from './Chat';
 import { SupabaseDashboard } from '@/components/SupabaseDashboard';
 import HowItWorks from '@/components/HowItWorks';
 import SampleQueries from '@/components/SampleQueries';
+import { N8NChatWidget } from '@/components/N8NChatWidget';
 
 type ViewType = 'home' | 'chat' | 'dashboard' | 'how-it-works' | 'sample-queries';
 
@@ -74,6 +75,9 @@ const Index = () => {
           </div>
         </div>
       )}
+      
+      {/* Global Chat Widget - Available on all pages */}
+      <N8NChatWidget />
     </div>
   );
 };

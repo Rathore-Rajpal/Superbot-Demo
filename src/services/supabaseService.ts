@@ -19,6 +19,7 @@ export interface Task {
   updated_at: string;
   project_id: string | null;
   progress: number;
+  assigned_to?: string; // Member name
 }
 
 export interface Member {
@@ -35,6 +36,15 @@ export interface Member {
   created_at: string;
   updated_at: string;
   user_id: string | null;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  department: string | null;
+  is_active: boolean;
+  type: 'member' | 'admin' | 'project_manager';
 }
 
 export interface Project {
@@ -90,13 +100,29 @@ export interface DailyTask {
 // Tasks Service
 export const tasksService = {
   async getAll() {
-    const { data, error } = await supabase
+    // Since there's no FK relationship, we'll fetch tasks and members separately
+    const { data: tasksData, error: tasksError } = await supabase
       .from('tasks')
       .select('*')
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
-    return data as Task[];
+    if (tasksError) throw tasksError;
+    
+    // Fetch all members to map user_id to names
+    const { data: membersData, error: membersError } = await supabase
+      .from('members')
+      .select('id, name');
+    
+    if (membersError) throw membersError;
+    
+    // Create a lookup map
+    const memberMap = new Map(membersData?.map(m => [m.id, m.name]) || []);
+    
+    // Transform data to include assigned_to
+    return (tasksData || []).map(task => ({
+      ...task,
+      assigned_to: memberMap.get(task.user_id) || null
+    })) as Task[];
   },
 
   async getById(id: string) {
@@ -140,6 +166,31 @@ export const tasksService = {
       .eq('id', id);
     
     if (error) throw error;
+  }
+};
+
+// Users Service (Combined Members, Admins, PMs)
+export const usersService = {
+  async getAllUsers() {
+    // Fetch all user types in parallel
+    const [members, admins, pms] = await Promise.all([
+      supabase.from('members').select('id, name, email, department, is_active').order('name'),
+      supabase.from('admins').select('id, name, email, is_active').order('name'),
+      supabase.from('project_managers').select('id, name, email, department, is_active').order('name')
+    ]);
+
+    if (members.error) throw members.error;
+    if (admins.error) throw admins.error;
+    if (pms.error) throw pms.error;
+
+    // Combine and type all users
+    const allUsers: User[] = [
+      ...(members.data || []).map(m => ({ ...m, type: 'member' as const, department: m.department })),
+      ...(admins.data || []).map(a => ({ ...a, type: 'admin' as const, department: null })),
+      ...(pms.data || []).map(pm => ({ ...pm, type: 'project_manager' as const, department: pm.department }))
+    ];
+
+    return allUsers;
   }
 };
 
@@ -370,9 +421,9 @@ export const dailyTasksService = {
 // Dashboard Statistics
 export const dashboardService = {
   async getStats() {
-    const [tasks, members, projects, leaves] = await Promise.all([
+    const [tasks, allUsers, projects, leaves] = await Promise.all([
       tasksService.getAll(),
-      membersService.getAll(),
+      usersService.getAllUsers(),
       projectsService.getAll(),
       leavesService.getAll()
     ]);
@@ -382,8 +433,8 @@ export const dashboardService = {
       completedTasks: tasks.filter(t => t.status === 'completed').length,
       pendingTasks: tasks.filter(t => t.status === 'pending').length,
       inProgressTasks: tasks.filter(t => t.status === 'in_progress').length,
-      totalMembers: members.length,
-      activeMembers: members.filter(m => m.is_active).length,
+      totalMembers: allUsers.length,
+      activeMembers: allUsers.filter(m => m.is_active).length,
       totalProjects: projects.length,
       activeProjects: projects.filter(p => p.status === 'active').length,
       completedProjects: projects.filter(p => p.status === 'completed').length,

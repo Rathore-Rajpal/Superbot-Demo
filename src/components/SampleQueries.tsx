@@ -1,6 +1,34 @@
-import { MessageSquare, Code, Database, Users, Calendar, BarChart, FileText } from 'lucide-react';
+import { MessageSquare, Code, Database, Users, Calendar, BarChart, FileText, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
 
 const SampleQueries = () => {
+  const [copiedQuery, setCopiedQuery] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string) => {
+    // Remove quotes from the text
+    const cleanText = text.replace(/^"|"$/g, '');
+    navigator.clipboard.writeText(cleanText);
+    setCopiedQuery(text);
+    setTimeout(() => setCopiedQuery(null), 2000);
+  };
+
+  const QueryCard = ({ query }: { query: string }) => (
+    <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors group flex items-center justify-between gap-2">
+      <p className="text-gray-300 flex-1">{query}</p>
+      <button
+        onClick={() => copyToClipboard(query)}
+        className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-white/10 rounded-lg"
+        title="Copy query"
+      >
+        {copiedQuery === query ? (
+          <Check className="w-4 h-4 text-green-400" />
+        ) : (
+          <Copy className="w-4 h-4 text-gray-400" />
+        )}
+      </button>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-8">
       <div className="max-w-6xl mx-auto">
@@ -45,24 +73,12 @@ const SampleQueries = () => {
               <h3 className="text-3xl font-bold text-blue-400">Tasks & Progress</h3>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show me all overdue tasks"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"What tasks are assigned to John this week?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"List all high-priority tasks that are in progress"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"How many tasks were completed today?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show tasks with approaching deadlines"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"What are the pending tasks for the mobile app project?"</p>
-              </div>
+              <QueryCard query="Show me all overdue tasks" />
+              <QueryCard query="What tasks are assigned to John this week?" />
+              <QueryCard query="List all high-priority tasks that are in progress" />
+              <QueryCard query="How many tasks were completed today?" />
+              <QueryCard query="Show tasks with approaching deadlines" />
+              <QueryCard query="What are the pending tasks for the mobile app project?" />
             </div>
           </div>
 
@@ -75,24 +91,12 @@ const SampleQueries = () => {
               <h3 className="text-3xl font-bold text-purple-400">Projects & Teams</h3>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show me all active projects"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Which projects are managed by Sarah?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"List projects created in the last month"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"What are the project deadlines this quarter?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"How many projects are currently in progress?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show project completion status"</p>
-              </div>
+              <QueryCard query="Show me all active projects" />
+              <QueryCard query="Which projects are managed by Sarah?" />
+              <QueryCard query="List projects created in the last month" />
+              <QueryCard query="What are the project deadlines this quarter?" />
+              <QueryCard query="How many projects are currently in progress?" />
+              <QueryCard query="Show project completion status" />
             </div>
           </div>
 
@@ -105,24 +109,12 @@ const SampleQueries = () => {
               <h3 className="text-3xl font-bold text-green-400">Members & HR</h3>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"List all team members with their roles"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Who are the active members in the development team?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show members who joined in the last 6 months"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"What is the total number of active members?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"List all project managers and their email addresses"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show member activity in the last week"</p>
-              </div>
+              <QueryCard query="List all team members with their roles" />
+              <QueryCard query="Who are the active members in the development team?" />
+              <QueryCard query="Show members who joined in the last 6 months" />
+              <QueryCard query="What is the total number of active members?" />
+              <QueryCard query="List all project managers and their email addresses" />
+              <QueryCard query="Show member activity in the last week" />
             </div>
           </div>
 
@@ -135,24 +127,12 @@ const SampleQueries = () => {
               <h3 className="text-3xl font-bold text-yellow-400">Leaves & Attendance</h3>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show all pending leave requests"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Who is on leave this week?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"What are the upcoming company holidays?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"How many sick leaves were taken last month?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show approved leave requests for this quarter"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"What is the remaining leave balance for each member?"</p>
-              </div>
+              <QueryCard query="Show all pending leave requests" />
+              <QueryCard query="Who is on leave this week?" />
+              <QueryCard query="What are the upcoming company holidays?" />
+              <QueryCard query="How many sick leaves were taken last month?" />
+              <QueryCard query="Show approved leave requests for this quarter" />
+              <QueryCard query="What is the remaining leave balance for each member?" />
             </div>
           </div>
 
@@ -165,24 +145,12 @@ const SampleQueries = () => {
               <h3 className="text-3xl font-bold text-cyan-400">Analytics & Reports</h3>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"What is the completion rate of tasks this month?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show task distribution by priority"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"How many daily tasks were logged today?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Which project has the most pending tasks?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show productivity trends for the last 3 months"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"List the top 5 most active members"</p>
-              </div>
+              <QueryCard query="What is the completion rate of tasks this month?" />
+              <QueryCard query="Show task distribution by priority" />
+              <QueryCard query="How many daily tasks were logged today?" />
+              <QueryCard query="Which project has the most pending tasks?" />
+              <QueryCard query="Show productivity trends for the last 3 months" />
+              <QueryCard query="List the top 5 most active members" />
             </div>
           </div>
 
@@ -195,24 +163,12 @@ const SampleQueries = () => {
               <h3 className="text-3xl font-bold text-pink-400">Audit & Activity</h3>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show recent audit logs"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"What actions were performed by admin today?"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"List all notifications sent this week"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Show deleted tasks from the last 7 days"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Display recent system changes"</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 hover:bg-black/40 transition-colors">
-                <p className="text-gray-300">"Who modified the task settings recently?"</p>
-              </div>
+              <QueryCard query="Show recent audit logs" />
+              <QueryCard query="What actions were performed by admin today?" />
+              <QueryCard query="List all notifications sent this week" />
+              <QueryCard query="Show deleted tasks from the last 7 days" />
+              <QueryCard query="Display recent system changes" />
+              <QueryCard query="Who modified the task settings recently?" />
             </div>
           </div>
         </div>

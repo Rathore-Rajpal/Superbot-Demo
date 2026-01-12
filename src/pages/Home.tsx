@@ -88,57 +88,7 @@ const Home = ({ onSelectOption }: HomeProps) => {
           initial="hidden"
           animate="show"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Chat Option */}
-            <motion.div variants={item}>
-              <button
-                onClick={() => onSelectOption('Chat')}
-                className="w-full group relative overflow-hidden rounded-3xl transition-all duration-500 hover:scale-[1.02]"
-              >
-                {/* Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#119cff]/20 via-[#0d7acc]/10 to-transparent" />
-                
-                {/* Glow Effect */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#119cff]/30 to-transparent blur-xl" />
-                </div>
-                
-                {/* Border Gradient */}
-                <div className="absolute inset-0 rounded-3xl p-[2px] bg-gradient-to-br from-[#119cff]/50 to-transparent">
-                  <div className="h-full w-full bg-[#0a1a3a] rounded-3xl" />
-                </div>
-                
-                {/* Content */}
-                <div className="relative z-10 p-10 flex flex-col items-center text-center space-y-6">
-                  {/* Icon Container with Animation */}
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-[#119cff]/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500" />
-                    <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#119cff] to-[#0d7acc] flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-500">
-                      <MessageSquare className="w-10 h-10 text-white" strokeWidth={2.5} />
-                    </div>
-                  </div>
-                  
-                  {/* Text Content */}
-                  <div className="space-y-3">
-                    <h3 className="text-3xl font-bold text-white group-hover:text-[#119cff] transition-colors duration-300">
-                      Chat with AI
-                    </h3>
-                    <p className="text-gray-400 text-lg leading-relaxed">
-                      Start a conversation with our intelligent assistant
-                    </p>
-                  </div>
-                  
-                  {/* Arrow Indicator */}
-                  <div className="flex items-center gap-2 text-[#119cff] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                    <span className="text-sm font-medium">Get Started</span>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </div>
-                </div>
-              </button>
-            </motion.div>
-            
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Database Option */}
             <motion.div variants={item}>
               <button
