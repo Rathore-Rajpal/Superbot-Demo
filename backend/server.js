@@ -1,6 +1,6 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
 const cors = require('cors');
+const { supabase } = require('./supabase');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -9,129 +9,63 @@ const PORT = process.env.PORT || 5001;
 app.use(cors());
 app.use(express.json());
 
-// Database configuration from environment variables
-const dbConfig = {
-  host: process.env.DB_HOST || 'sql12.freesqldatabase.com',
-  user: process.env.DB_USER || 'sql12791893',
-  password: process.env.DB_PASSWORD || '3ALYm8PAgb',
-  database: process.env.DB_NAME || 'sql12791893',
-  port: process.env.DB_PORT || 3306,
-  connectionLimit: 2,
-  queueLimit: 0
-};
-
-console.log('🔧 Database Config:', {
-  host: dbConfig.host,
-  user: dbConfig.user,
-  database: dbConfig.database,
-  port: dbConfig.port
-});
-
-// Create connection pool
-const pool = mysql.createPool(dbConfig);
-
 // Test database connection
 const testConnection = async () => {
   try {
-    const connection = await pool.getConnection();
-    console.log('✅ Database connected successfully');
-    connection.release();
+    const { data, error } = await supabase.from('task').select('count').limit(1);
+    if (error && error.code !== 'PGRST116') { // PGRST116 means table might not exist yet
+      throw error;
+    }
+    console.log('✅ Supabase connected successfully');
   } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
-    process.exit(1);
+    console.error('❌ Supabase connection failed:', error.message);
+    console.log('💡 Note: Tables may need to be created in Supabase dashboard');
   }
 };
 
-// Initialize database tables and sample data
+// Initialize database tables (Optional - you should create these in Supabase dashboard)
 const initializeTables = async () => {
-  try {
-    const connection = await pool.getConnection();
-    
-    // Create task table
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS task (
-        id INT(11) NOT NULL AUTO_INCREMENT,
-        title VARCHAR(255) NOT NULL,
-        status ENUM('pending','in_progress','completed') NOT NULL,
-        due_date DATE DEFAULT NULL,
-        priority INT(11) DEFAULT NULL,
-        assigned_to VARCHAR(100) DEFAULT NULL,
-        PRIMARY KEY (id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=latin1
-    `);
-    
-    // Create finance table
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS finance (
-        id INT(11) NOT NULL AUTO_INCREMENT,
-        description VARCHAR(255) NOT NULL,
-        amount DECIMAL(10,2) NOT NULL,
-        type ENUM('income','expense') NOT NULL,
-        date DATE DEFAULT NULL,
-        PRIMARY KEY (id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=latin1
-    `);
-    
-    console.log('✅ Database tables initialized');
-    
-    // Check if we need to insert sample data
-    const [taskCount] = await connection.query('SELECT COUNT(*) as count FROM task');
-    const [financeCount] = await connection.query('SELECT COUNT(*) as count FROM finance');
-    
-    if (taskCount[0].count === 0) {
-      // Insert sample tasks
-      await connection.query(`
-        INSERT INTO task (title, status, due_date, priority, assigned_to) VALUES 
-        ('Complete project documentation', 'in_progress', '2024-02-15', 3, 'John Doe'),
-        ('Review code changes', 'pending', '2024-02-10', 2, 'Jane Smith'),
-        ('Deploy to production', 'completed', '2024-02-05', 1, 'Mike Johnson'),
-        ('Update user interface', 'pending', '2024-02-20', 4, 'Sarah Wilson')
-      `);
-      console.log('✅ Sample tasks inserted');
-    }
-    
-    if (financeCount[0].count === 0) {
-      // Insert sample finance records
-      await connection.query(`
-        INSERT INTO finance (description, amount, type, date) VALUES 
-        ('Salary payment', 5000.00, 'income', '2024-02-01'),
-        ('Office rent', 1200.00, 'expense', '2024-02-01'),
-        ('Freelance project', 1500.00, 'income', '2024-02-05'),
-        ('Software subscription', 99.00, 'expense', '2024-02-03'),
-        ('Client payment', 3000.00, 'income', '2024-02-10'),
-        ('Marketing expenses', 500.00, 'expense', '2024-02-08')
-      `);
-      console.log('✅ Sample finance records inserted');
-    }
-    
-    connection.release();
-  } catch (error) {
-    console.error('❌ Table initialization failed:', error.message);
-  }
+  console.log('💡 Database tables should be created in Supabase dashboard:');
+  console.log('   - task table: id, title, status, due_date, priority, assigned_to, description, assigned_date, project_name');
+  console.log('   - finance table: id, description, amount, type, date, project_name, due_date, contact_person, contact_person_contact_no');
+  console.log('   - users table: id, name, email, mobile, address, created_at');
 };
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    message: 'Server is running',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development',
-    database: {
-      host: dbConfig.host,
-      database: dbConfig.database,
-      connected: true
-    }
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('task').select('count').limit(1);
+    res.json({ 
+      status: 'ok', 
+      message: 'Server is running',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development',
+      database: {
+        type: 'Supabase (PostgreSQL)',
+        connected: !error || error.code === 'PGRST116'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'error', 
+      message: error.message 
+    });
+  }
 });
 
 // Task endpoints
 app.get('/api/tasks', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM task ORDER BY id DESC');
-    console.log(`📋 Fetched ${rows.length} tasks`);
-    res.json(rows);
+    const { data, error } = await supabase
+      .from('task')
+      .select('*')
+      .order('id', { ascending: false });
+    
+    if (error) throw error;
+    
+    console.log(`📋 Fetched ${data.length} tasks`);
+    res.json(data);
   } catch (error) {
     console.error('❌ Error fetching tasks:', error);
     res.status(500).json({ error: 'Failed to fetch tasks', details: error.message });
@@ -140,15 +74,27 @@ app.get('/api/tasks', async (req, res) => {
 
 app.post('/api/tasks', async (req, res) => {
   try {
-    const { title, status, due_date, priority, assigned_to } = req.body;
-    const [result] = await pool.query(
-      'INSERT INTO task (title, status, due_date, priority, assigned_to) VALUES (?, ?, ?, ?, ?)',
-      [title, status || 'pending', due_date, priority, assigned_to]
-    );
+    const { title, status, due_date, priority, assigned_to, description, assigned_date, project_name } = req.body;
     
-    const [newTask] = await pool.query('SELECT * FROM task WHERE id = ?', [result.insertId]);
+    const { data, error } = await supabase
+      .from('task')
+      .insert([{
+        title,
+        status: status || 'not_started',
+        due_date,
+        priority,
+        assigned_to,
+        description,
+        assigned_date,
+        project_name
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
     console.log(`✅ Created task: ${title}`);
-    res.status(201).json(newTask[0]);
+    res.status(201).json(data);
   } catch (error) {
     console.error('❌ Error creating task:', error);
     res.status(500).json({ error: 'Failed to create task', details: error.message });
@@ -157,17 +103,29 @@ app.post('/api/tasks', async (req, res) => {
 
 app.put('/api/tasks/:id', async (req, res) => {
   try {
-    const { title, status, due_date, priority, assigned_to } = req.body;
+    const { title, status, due_date, priority, assigned_to, description, assigned_date, project_name } = req.body;
     const { id } = req.params;
     
-    await pool.query(
-      'UPDATE task SET title = ?, status = ?, due_date = ?, priority = ?, assigned_to = ? WHERE id = ?',
-      [title, status, due_date, priority, assigned_to, id]
-    );
+    const { data, error } = await supabase
+      .from('task')
+      .update({
+        title,
+        status,
+        due_date,
+        priority,
+        assigned_to,
+        description,
+        assigned_date,
+        project_name
+      })
+      .eq('id', id)
+      .select()
+      .single();
     
-    const [updatedTask] = await pool.query('SELECT * FROM task WHERE id = ?', [id]);
+    if (error) throw error;
+    
     console.log(`✅ Updated task: ${title}`);
-    res.json(updatedTask[0]);
+    res.json(data);
   } catch (error) {
     console.error('❌ Error updating task:', error);
     res.status(500).json({ error: 'Failed to update task', details: error.message });
@@ -177,7 +135,14 @@ app.put('/api/tasks/:id', async (req, res) => {
 app.delete('/api/tasks/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    await pool.query('DELETE FROM task WHERE id = ?', [id]);
+    
+    const { error } = await supabase
+      .from('task')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    
     console.log(`✅ Deleted task ID: ${id}`);
     res.json({ message: 'Task deleted successfully' });
   } catch (error) {
@@ -189,9 +154,15 @@ app.delete('/api/tasks/:id', async (req, res) => {
 // Finance endpoints
 app.get('/api/finances', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM finance ORDER BY id DESC');
-    console.log(`💰 Fetched ${rows.length} finance records`);
-    res.json(rows);
+    const { data, error } = await supabase
+      .from('finance')
+      .select('*')
+      .order('id', { ascending: false });
+    
+    if (error) throw error;
+    
+    console.log(`💰 Fetched ${data.length} finance records`);
+    res.json(data);
   } catch (error) {
     console.error('❌ Error fetching finances:', error);
     res.status(500).json({ error: 'Failed to fetch finances', details: error.message });
@@ -200,15 +171,27 @@ app.get('/api/finances', async (req, res) => {
 
 app.post('/api/finances', async (req, res) => {
   try {
-    const { description, amount, type, date } = req.body;
-    const [result] = await pool.query(
-      'INSERT INTO finance (description, amount, type, date) VALUES (?, ?, ?, ?)',
-      [description, amount, type, date]
-    );
+    const { description, amount, type, date, project_name, due_date, contact_person, contact_person_contact_no } = req.body;
     
-    const [newFinance] = await pool.query('SELECT * FROM finance WHERE id = ?', [result.insertId]);
+    const { data, error } = await supabase
+      .from('finance')
+      .insert([{
+        description,
+        amount,
+        type,
+        date,
+        project_name,
+        due_date,
+        contact_person,
+        contact_person_contact_no
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
     console.log(`✅ Created finance record: ${description}`);
-    res.status(201).json(newFinance[0]);
+    res.status(201).json(data);
   } catch (error) {
     console.error('❌ Error creating finance record:', error);
     res.status(500).json({ error: 'Failed to create finance record', details: error.message });
@@ -217,17 +200,29 @@ app.post('/api/finances', async (req, res) => {
 
 app.put('/api/finances/:id', async (req, res) => {
   try {
-    const { description, amount, type, date } = req.body;
+    const { description, amount, type, date, project_name, due_date, contact_person, contact_person_contact_no } = req.body;
     const { id } = req.params;
     
-    await pool.query(
-      'UPDATE finance SET description = ?, amount = ?, type = ?, date = ? WHERE id = ?',
-      [description, amount, type, date, id]
-    );
+    const { data, error } = await supabase
+      .from('finance')
+      .update({
+        description,
+        amount,
+        type,
+        date,
+        project_name,
+        due_date,
+        contact_person,
+        contact_person_contact_no
+      })
+      .eq('id', id)
+      .select()
+      .single();
     
-    const [updatedFinance] = await pool.query('SELECT * FROM finance WHERE id = ?', [id]);
+    if (error) throw error;
+    
     console.log(`✅ Updated finance record: ${description}`);
-    res.json(updatedFinance[0]);
+    res.json(data);
   } catch (error) {
     console.error('❌ Error updating finance record:', error);
     res.status(500).json({ error: 'Failed to update finance record', details: error.message });
@@ -237,12 +232,109 @@ app.put('/api/finances/:id', async (req, res) => {
 app.delete('/api/finances/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    await pool.query('DELETE FROM finance WHERE id = ?', [id]);
+    
+    const { error } = await supabase
+      .from('finance')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    
     console.log(`✅ Deleted finance record ID: ${id}`);
     res.json({ message: 'Finance record deleted successfully' });
   } catch (error) {
     console.error('❌ Error deleting finance record:', error);
     res.status(500).json({ error: 'Failed to delete finance record', details: error.message });
+  }
+});
+
+// Users endpoints
+app.get('/api/users', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('id', { ascending: false });
+    
+    if (error) throw error;
+    
+    console.log(`👥 Fetched ${data.length} users`);
+    res.json(data);
+  } catch (error) {
+    console.error('❌ Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users', details: error.message });
+  }
+});
+
+app.post('/api/users', async (req, res) => {
+  try {
+    const { name, email, mobile, address } = req.body;
+    
+    const { data, error } = await supabase
+      .from('users')
+      .insert([{
+        name,
+        email,
+        mobile,
+        address,
+        created_at: new Date().toISOString()
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    console.log(`✅ Created user: ${name}`);
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('❌ Error creating user:', error);
+    res.status(500).json({ error: 'Failed to create user', details: error.message });
+  }
+});
+
+app.put('/api/users/:id', async (req, res) => {
+  try {
+    const { name, email, mobile, address } = req.body;
+    const { id } = req.params;
+    
+    const { data, error } = await supabase
+      .from('users')
+      .update({
+        name,
+        email,
+        mobile,
+        address
+      })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    console.log(`✅ Updated user: ${name}`);
+    res.json(data);
+  } catch (error) {
+    console.error('❌ Error updating user:', error);
+    res.status(500).json({ error: 'Failed to update user', details: error.message });
+  }
+});
+
+app.delete('/api/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    
+    console.log(`✅ Deleted user ID: ${id}`);
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('❌ Error deleting user:', error);
+    res.status(500).json({ error: 'Failed to delete user', details: error.message });
   }
 });
 

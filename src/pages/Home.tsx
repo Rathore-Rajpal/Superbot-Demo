@@ -1,27 +1,13 @@
-import { useState, useEffect } from 'react';
-import { DollarSign, CheckSquare, Sparkles, Zap, ArrowRight, Database } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import OptionCard from '@/components/OptionCard';
+import { useState } from 'react';
+import { MessageSquare, Database, Github, Globe } from 'lucide-react';
+import { motion } from 'framer-motion';
 import FloatingParticles from '@/components/FloatingParticles';
-import { ChatPage } from '@/components/ChatPage';
 
 interface HomeProps {
   onSelectOption: (option: string) => void;
 }
 
 const Home = ({ onSelectOption }: HomeProps) => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [chatCategory, setChatCategory] = useState<string | null>(null);
-
-  const handleOptionClick = (option: string) => {
-    // For all options, open chat UI first
-    setChatCategory(option);
-  };
-
-  const handleCloseChat = () => {
-    setChatCategory(null);
-  };
-
   // Animation variants with proper TypeScript types
   const container: { [key: string]: any } = {
     hidden: { opacity: 0 },
@@ -71,11 +57,9 @@ const Home = ({ onSelectOption }: HomeProps) => {
           transition={{ duration: 0.5 }}
           className="mb-12"
         >
-          <img 
-            src="https://mmadclhbsuvkcbibxcsp.supabase.co/storage/v1/object/public/avatars//LOGO-02.png" 
-            alt="Tasknova Logo" 
-            className="h-16 md:h-20"
-          />
+          <div className="text-8xl md:text-9xl">
+            🤖
+          </div>
         </motion.div>
         
         {/* Title section */}
@@ -85,91 +69,126 @@ const Home = ({ onSelectOption }: HomeProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <div className="inline-flex items-center justify-center px-4 py-2 mb-6 rounded-full bg-[#119cff]/10 border border-[#119cff]/30 text-[#119cff] text-sm font-medium">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Introducing Tasknova Superbot
-          </div>
-          
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-[#a0c4ff] leading-tight">
-            AI-Powered Productivity
+            AI Agent
             <br />
-            <span className="text-[#119cff]">Supercharged</span>
+            <span className="text-[#119cff]">Superbot</span>
           </h1>
           
           <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed mb-8">
-            Your intelligent AI assistant for finance, tasks, and productivity. 
-            Experience the future of work with Tasknova's advanced AI technology.
+            Your intelligent AI assistant powered by advanced language models.
+            Chat with the bot or explore your database.
           </p>
-          
-          {/* Get Started button hidden */}
-          {/* <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#119cff] to-[#0d7acc] text-white font-medium rounded-lg hover:shadow-lg hover:shadow-[#119cff]/30 transition-all duration-300"
-          >
-            Get Started
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </motion.button> */}
         </motion.div>
         
-        {/* Features/Cards section */}
+        {/* Main Options */}
         <motion.div 
-          className="w-full max-w-6xl mx-auto"
+          className="w-full max-w-5xl mx-auto"
           variants={container}
           initial="hidden"
           animate="show"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <motion.div variants={item} className="group">
-              <OptionCard
-                title="Finance"
-                icon={<DollarSign className="w-6 h-6" />}
-                onClick={() => handleOptionClick('Finance')}
-                className="bg-white/5 backdrop-blur-md border border-white/10 hover:border-[#119cff]/50 transition-all duration-300 group-hover:scale-105"
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Chat Option */}
+            <motion.div variants={item}>
+              <button
+                onClick={() => onSelectOption('Chat')}
+                className="w-full group relative overflow-hidden rounded-3xl transition-all duration-500 hover:scale-[1.02]"
+              >
+                {/* Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#119cff]/20 via-[#0d7acc]/10 to-transparent" />
+                
+                {/* Glow Effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#119cff]/30 to-transparent blur-xl" />
+                </div>
+                
+                {/* Border Gradient */}
+                <div className="absolute inset-0 rounded-3xl p-[2px] bg-gradient-to-br from-[#119cff]/50 to-transparent">
+                  <div className="h-full w-full bg-[#0a1a3a] rounded-3xl" />
+                </div>
+                
+                {/* Content */}
+                <div className="relative z-10 p-10 flex flex-col items-center text-center space-y-6">
+                  {/* Icon Container with Animation */}
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-[#119cff]/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500" />
+                    <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#119cff] to-[#0d7acc] flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-500">
+                      <MessageSquare className="w-10 h-10 text-white" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  
+                  {/* Text Content */}
+                  <div className="space-y-3">
+                    <h3 className="text-3xl font-bold text-white group-hover:text-[#119cff] transition-colors duration-300">
+                      Chat with AI
+                    </h3>
+                    <p className="text-gray-400 text-lg leading-relaxed">
+                      Start a conversation with our intelligent assistant
+                    </p>
+                  </div>
+                  
+                  {/* Arrow Indicator */}
+                  <div className="flex items-center gap-2 text-[#119cff] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    <span className="text-sm font-medium">Get Started</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                </div>
+              </button>
             </motion.div>
             
-            <motion.div variants={item} className="group">
-              <OptionCard
-                title="Tasks"
-                icon={<CheckSquare className="w-6 h-6" />}
-                onClick={() => handleOptionClick('Tasks')}
-                className="bg-white/5 backdrop-blur-md border border-white/10 hover:border-[#119cff]/50 transition-all duration-300 group-hover:scale-105"
-              />
-            </motion.div>
-            
-            <motion.div variants={item} className="group">
-              <OptionCard
-                title="Smart Assistant"
-                icon={<Sparkles className="w-6 h-6" />}
-                isPlaceholder={true}
-                className="bg-white/5 backdrop-blur-md border border-white/5 opacity-50 cursor-not-allowed hover:opacity-50 transition-all duration-300"
-              />
-            </motion.div>
-            
-            <motion.div variants={item} className="group">
-              <OptionCard
-                title="Analytics"
-                icon={<Zap className="w-6 h-6" />}
-                isPlaceholder={true}
-                className="bg-white/5 backdrop-blur-md border border-white/5 opacity-50 cursor-not-allowed hover:opacity-50 transition-all duration-300"
-              />
+            {/* Database Option */}
+            <motion.div variants={item}>
+              <button
+                onClick={() => onSelectOption('Supabase Dashboard')}
+                className="w-full group relative overflow-hidden rounded-3xl transition-all duration-500 hover:scale-[1.02]"
+              >
+                {/* Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-transparent" />
+                
+                {/* Glow Effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 to-transparent blur-xl" />
+                </div>
+                
+                {/* Border Gradient */}
+                <div className="absolute inset-0 rounded-3xl p-[2px] bg-gradient-to-br from-emerald-500/50 to-transparent">
+                  <div className="h-full w-full bg-[#0a1a3a] rounded-3xl" />
+                </div>
+                
+                {/* Content */}
+                <div className="relative z-10 p-10 flex flex-col items-center text-center space-y-6">
+                  {/* Icon Container with Animation */}
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-emerald-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500" />
+                    <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-500">
+                      <Database className="w-10 h-10 text-white" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  
+                  {/* Text Content */}
+                  <div className="space-y-3">
+                    <h3 className="text-3xl font-bold text-white group-hover:text-emerald-400 transition-colors duration-300">
+                      View Database
+                    </h3>
+                    <p className="text-gray-400 text-lg leading-relaxed">
+                      Explore and manage your live Supabase data
+                    </p>
+                  </div>
+                  
+                  {/* Arrow Indicator */}
+                  <div className="flex items-center gap-2 text-emerald-400 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    <span className="text-sm font-medium">Explore Data</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                </div>
+              </button>
             </motion.div>
           </div>
-          
-          {/* View Database Button */}
-          <motion.div 
-            variants={item}
-            className="mt-12 text-center"
-          >
-            <button
-              onClick={() => onSelectOption('Database')}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#119cff] to-[#0d7acc] text-white font-medium rounded-lg hover:shadow-lg hover:shadow-[#119cff]/30 transition-all duration-300"
-            >
-              <Database className="w-5 h-5 mr-2" />
-              View Database
-            </button>
-          </motion.div>
         </motion.div>
         
         {/* Footer */}
@@ -179,28 +198,34 @@ const Home = ({ onSelectOption }: HomeProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <div className="flex items-center justify-center space-x-6 mb-6">
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">About</a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">Features</a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">Pricing</a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a>
+          <p className="text-gray-400 mb-4">
+            Built with React, TypeScript, Supabase & AI
+          </p>
+          <div className="flex items-center justify-center space-x-6 text-sm">
+            <a 
+              href="https://github.com/Rathore-Rajpal" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-gray-400 hover:text-[#119cff] transition-colors"
+            >
+              <Github className="w-5 h-5" />
+              GitHub
+            </a>
+            <a 
+              href="https://www.rathorerajpal.live" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-gray-400 hover:text-[#119cff] transition-colors"
+            >
+              <Globe className="w-5 h-5" />
+              Portfolio
+            </a>
           </div>
-          <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Tasknova. All rights reserved.
+          <p className="text-sm text-gray-600 mt-6">
+            © 2026 Rajpal Rathore. All rights reserved.
           </p>
         </motion.div>
-      
       </div>
-
-      {/* Chat Page - Rendered when a category is selected */}
-      <AnimatePresence>
-        {chatCategory && (
-          <ChatPage 
-            category={chatCategory} 
-            onClose={handleCloseChat} 
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 };
